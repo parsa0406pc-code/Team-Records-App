@@ -170,3 +170,110 @@ def record_detail(
             "record": record
         }
     )
+
+
+@router.get("/records/{record_id}/edit")
+def edit_record_page(
+    record_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    record = db.query(Record).filter(
+        Record.id == record_id
+    ).first()
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Record not found"
+        )
+
+    if record.creator_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="record_edit.html",
+        context={
+            "user": user,
+            "record": record
+        }
+    )
+
+
+@router.post("/records/{record_id}/edit")
+def edit_record(
+    record_id: int,
+    title: str = Form(...),
+    description: str = Form(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    record = db.query(Record).filter(
+        Record.id == record_id
+    ).first()
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Record not found"
+        )
+
+    if record.creator_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
+    record.title = title
+    record.description = description
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/records/{record.id}",
+        status_code=303
+    )
+
+
+@router.post("/records/{record_id}/delete")
+def delete_record(
+    record_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    record = db.query(Record).filter(
+        Record.id == record_id
+    ).first()
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Record not found"
+        )
+
+    if record.creator_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
+    for attachment in record.attachments:
+
+        file_path = UPLOAD_DIR / attachment.stored_name
+
+        if file_path.exists():
+            file_path.unlink()
+
+    db.delete(record)
+
+    db.commit()
+
+    return RedirectResponse(
+        url="/",
+        status_code=303
+    )

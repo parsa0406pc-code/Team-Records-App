@@ -4,9 +4,31 @@
 
 <div class="card">
 
-    <h1>
-        {{ record.title }}
-    </h1>
+    <div class="section-header">
+
+        <h1>
+            {{ record.title }}
+        </h1>
+
+        {% if record.creator_id == user.id %}
+
+        <div style="display:flex; gap:10px;">
+
+            <a class="btn" href="/records/{{ record.id }}/edit">
+                Bearbeiten
+            </a>
+
+            <form method="post" action="/records/{{ record.id }}/delete">
+                <button class="btn">
+                    Löschen
+                </button>
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
 
     <p>
         {{ record.description }}
