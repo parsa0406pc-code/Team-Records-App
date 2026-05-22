@@ -18,17 +18,40 @@
 
         </div>
 
+        {% for record in records %}
+
         <div class="card">
 
             <h2>
-                Willkommen
+                {{ record.title }}
             </h2>
 
             <p>
-                Das Team Records System läuft erfolgreich.
+                {{ record.description }}
             </p>
 
+            <small>
+
+                Von:
+                {{ record.creator.name }}
+
+                •
+
+                {{ record.created_at.strftime('%d.%m.%Y %H:%M') }}
+
+            </small>
+
         </div>
+
+        {% else %}
+
+        <div class="card">
+
+            Noch keine Records vorhanden.
+
+        </div>
+
+        {% endfor %}
 
     </section>
 
