@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h1>
+        {{ record.title }}
+    </h1>
+
+    <p>
+        {{ record.description }}
+    </p>
+
+    <small>
+        Von:
+        {{ record.creator.name }}
+
+        •
+
+        {{ record.created_at.strftime('%d.%m.%Y %H:%M') }}
+    </small>
+
+</div>
+
+<div class="card">
+
+    <h2>
+        Dateien
+    </h2>
+
+    {% for file in record.attachments %}
+
+    <div class="file-item">
+
+        {% if file.content_type.startswith("image/") %}
+
+        <img class="preview-image" src="/uploads/{{ file.stored_name }}" alt="{{ file.original_name }}">
+
+        {% endif %}
+
+        <a href="/uploads/{{ file.stored_name }}" download="{{ file.original_name }}">
+            {{ file.original_name }} herunterladen
+        </a>
+
+    </div>
+
+    {% else %}
+
+    <p>
+        Keine Dateien vorhanden.
+    </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

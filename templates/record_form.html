@@ -8,7 +8,7 @@
         Neuer Record
     </h1>
 
-    <form method="post" action="/records">
+    <form method="post" action="/records" enctype="multipart/form-data">
 
         <label>
             Titel
@@ -21,6 +21,12 @@
         </label>
 
         <textarea name="description" rows="8" required></textarea>
+
+        <label>
+            Dateien / Bilder
+        </label>
+
+        <input type="file" name="files" multiple>
 
         <button class="btn full">
             Record erstellen
