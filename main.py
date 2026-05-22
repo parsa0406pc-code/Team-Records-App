@@ -13,14 +13,16 @@ from app.database import (
 
 from app.models import (
     User,
-    Record
+    Record,
+    Todo
 )
 
 from app.auth import get_current_user
 
 from app.routers import (
     users,
-    records
+    records,
+    todos
 )
 
 
@@ -48,6 +50,7 @@ templates = Jinja2Templates(
 
 app.include_router(users.router)
 app.include_router(records.router)
+app.include_router(todos.router)
 
 
 @app.get("/")
@@ -67,11 +70,16 @@ def home(
         Record.created_at.desc()
     ).all()
 
+    all_todos = db.query(Todo).order_by(
+        Todo.created_at.desc()
+    ).all()
+
     return templates.TemplateResponse(
         request=request,
         name="index.html",
         context={
             "user": user,
-            "records": all_records
+            "records": all_records,
+            "todos": all_todos
         }
     )

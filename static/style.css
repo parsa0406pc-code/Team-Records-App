@@ -200,3 +200,46 @@ textarea {
     border-radius: 12px;
     margin-bottom: 12px;
 }
+.todo-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.todo-form input {
+    flex: 1;
+}
+
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.todo-item {
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    gap: 8px;
+    align-items: center;
+
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+.todo-check,
+.todo-delete {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.todo-delete {
+    color: #b91c1c;
+}
+
+.todo-done {
+    text-decoration: line-through;
+    color: #6b7280;
+}

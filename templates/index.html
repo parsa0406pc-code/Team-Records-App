@@ -25,9 +25,7 @@
             <h2>
 
                 <a href="/records/{{ record.id }}">
-
                     {{ record.title }}
-
                 </a>
 
             </h2>
@@ -52,9 +50,7 @@
         {% else %}
 
         <div class="card">
-
             Noch keine Records vorhanden.
-
         </div>
 
         {% endfor %}
@@ -69,7 +65,53 @@
 
         <div class="card">
 
-            Noch keine Aufgaben vorhanden.
+            <form method="post" action="/todos" class="todo-form">
+
+                <input name="task" placeholder="Neue Aufgabe..." required>
+
+                <button class="btn">
+                    +
+                </button>
+
+            </form>
+
+            <div class="todo-list">
+
+                {% for todo in todos %}
+
+                <div class="todo-item">
+
+                    <form method="post" action="/todos/{{ todo.id }}/toggle">
+                        <button class="todo-check">
+                            {% if todo.done %}
+                            ✓
+                            {% else %}
+                            ○
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <span class="{% if todo.done %}todo-done{% endif %}">
+                        {{ todo.task }}
+                    </span>
+
+                    <form method="post" action="/todos/{{ todo.id }}/delete">
+                        <button class="todo-delete">
+                            ×
+                        </button>
+                    </form>
+
+                </div>
+
+                {% else %}
+
+                <p>
+                    Noch keine Aufgaben vorhanden.
+                </p>
+
+                {% endfor %}
+
+            </div>
 
         </div>
 
