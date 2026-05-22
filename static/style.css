@@ -4,40 +4,63 @@
 
 body {
     margin: 0;
-
     background: #f5f6fa;
-
-    font-family: sans-serif;
-
+    font-family: Arial, sans-serif;
     color: #111827;
 }
 
 .topbar {
-    height: 64px;
-
+    min-height: 64px;
     background: #111827;
-
     color: white;
 
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
+    gap: 16px;
 
     padding: 0 24px;
 }
 
-.topbar a {
+.brand {
     color: white;
-
     text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-nav {
+.nav {
     display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
 
-    gap: 16px;
+.nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.user-name {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.nav form {
+    margin: 0;
+}
+
+.nav-button {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    color: white;
+
+    padding: 8px 12px;
+    border-radius: 8px;
+
+    cursor: pointer;
 }
 
 .page {
@@ -46,91 +69,120 @@ nav {
 
 .auth-box {
     max-width: 420px;
-
     margin: 40px auto;
-
     background: white;
-
     padding: 24px;
-
     border-radius: 16px;
 }
 
 label {
     display: block;
-
     margin-top: 16px;
-
     margin-bottom: 8px;
 }
 
-input {
+input,
+textarea {
     width: 100%;
-
     padding: 12px;
-
     border: 1px solid #d1d5db;
-
     border-radius: 10px;
+    font-size: 16px;
+}
+
+textarea {
+    resize: vertical;
 }
 
 .btn {
+    display: inline-block;
     border: 0;
-
     background: #111827;
-
     color: white;
-
-    padding: 12px;
-
+    padding: 12px 16px;
     border-radius: 10px;
-
     cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
 }
 
 .full {
     width: 100%;
-
     margin-top: 20px;
 }
 
 .error {
     background: #fee2e2;
-
     color: #991b1b;
-
     padding: 12px;
-
     border-radius: 10px;
-
     margin-bottom: 16px;
 }
+
 .layout {
     display: grid;
-
-    grid-template-columns: 1fr 320px;
-
+    grid-template-columns: minmax(0, 1fr) 320px;
     gap: 24px;
 }
 
 .section-header {
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
+    gap: 16px;
     margin-bottom: 20px;
 }
 
 .card {
     background: white;
-
     padding: 24px;
-
     border-radius: 16px;
 }
 
 .sidebar h2 {
     margin-top: 0;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .page {
+        padding: 24px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .page {
+        padding: 16px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .auth-box {
+        margin: 20px auto;
+        padding: 20px;
+    }
 }

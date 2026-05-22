@@ -1,14 +1,19 @@
 import os
 
 from itsdangerous import URLSafeSerializer
+
 from passlib.context import CryptContext
 
-from fastapi import Request, HTTPException, Depends
-from fastapi.responses import Response
+from fastapi import (
+    Request,
+    Depends,
+    HTTPException
+)
 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models import User
 
 
@@ -31,6 +36,7 @@ pwd_context = CryptContext(
 
 
 def hash_password(password: str):
+
     return pwd_context.hash(password)
 
 
@@ -45,7 +51,7 @@ def verify_password(
 
 
 def create_session(
-    response: Response,
+    response,
     user_id: int
 ):
     token = serializer.dumps({
@@ -61,7 +67,8 @@ def create_session(
     )
 
 
-def clear_session(response: Response):
+def clear_session(response):
+
     response.delete_cookie(
         SESSION_COOKIE
     )
@@ -69,7 +76,7 @@ def clear_session(response: Response):
 
 def get_current_user(
     request: Request,
-    db: Session
+    db: Session = Depends(get_db)
 ):
     token = request.cookies.get(
         SESSION_COOKIE
@@ -101,8 +108,8 @@ def login_required(
     db: Session = Depends(get_db)
 ):
     user = get_current_user(
-        request,
-        db
+        request=request,
+        db=db
     )
 
     if not user:

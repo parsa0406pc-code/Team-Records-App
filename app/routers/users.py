@@ -1,11 +1,20 @@
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import (
+    APIRouter,
+    Request,
+    Form,
+    Depends
+)
+
 from fastapi.responses import RedirectResponse
+
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models import User
+
 from app.auth import (
     hash_password,
     verify_password,
@@ -15,15 +24,19 @@ from app.auth import (
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+
+templates = Jinja2Templates(
+    directory="templates"
+)
 
 
 @router.get("/register")
 def register_page(request: Request):
+
     return templates.TemplateResponse(
-        "register.html",
-        {
-            "request": request,
+        request=request,
+        name="register.html",
+        context={
             "error": None
         }
     )
@@ -42,10 +55,11 @@ def register(
     ).first()
 
     if existing_user:
+
         return templates.TemplateResponse(
-            "register.html",
-            {
-                "request": request,
+            request=request,
+            name="register.html",
+            context={
                 "error": "Diese E-Mail-Adresse ist bereits registriert."
             },
             status_code=400
@@ -58,7 +72,9 @@ def register(
     )
 
     db.add(user)
+
     db.commit()
+
     db.refresh(user)
 
     response = RedirectResponse(
@@ -66,17 +82,21 @@ def register(
         status_code=303
     )
 
-    create_session(response, user.id)
+    create_session(
+        response,
+        user.id
+    )
 
     return response
 
 
 @router.get("/login")
 def login_page(request: Request):
+
     return templates.TemplateResponse(
-        "login.html",
-        {
-            "request": request,
+        request=request,
+        name="login.html",
+        context={
             "error": None
         }
     )
@@ -97,10 +117,11 @@ def login(
         password,
         user.password_hash
     ):
+
         return templates.TemplateResponse(
-            "login.html",
-            {
-                "request": request,
+            request=request,
+            name="login.html",
+            context={
                 "error": "E-Mail oder Passwort ist falsch."
             },
             status_code=400
@@ -111,13 +132,17 @@ def login(
         status_code=303
     )
 
-    create_session(response, user.id)
+    create_session(
+        response,
+        user.id
+    )
 
     return response
 
 
 @router.post("/logout")
 def logout():
+
     response = RedirectResponse(
         url="/",
         status_code=303

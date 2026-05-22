@@ -2,15 +2,14 @@
 <html lang="de">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         Team Records App
     </title>
 
     <link rel="stylesheet" href="/static/style.css">
-
 </head>
 
 <body>
@@ -21,7 +20,21 @@
             Team Records
         </a>
 
-        <nav>
+        <nav class="nav">
+
+            {% if user %}
+
+            <span class="user-name">
+                {{ user.name | title }}
+            </span>
+
+            <form method="post" action="/logout">
+                <button class="nav-button">
+                    Logout
+                </button>
+            </form>
+
+            {% else %}
 
             <a href="/login">
                 Anmelden
@@ -30,6 +43,8 @@
             <a href="/register">
                 Registrieren
             </a>
+
+            {% endif %}
 
         </nav>
 

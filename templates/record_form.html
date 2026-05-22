@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-box">
+
+    <h1>
+        Neuer Record
+    </h1>
+
+    <form method="post" action="/records">
+
+        <label>
+            Titel
+        </label>
+
+        <input name="title" required>
+
+        <label>
+            Beschreibung
+        </label>
+
+        <textarea name="description" rows="8" required></textarea>
+
+        <button class="btn full">
+            Record erstellen
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
