@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from fastapi import Request
 from app.database import Base, engine
 from app.routers import users
 
@@ -26,7 +26,9 @@ templates = Jinja2Templates(
 
 
 @app.get("/")
-def home():
-    return {
-        "message": "Team Records App Running"
-    }
+def home(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="base.html"
+    )

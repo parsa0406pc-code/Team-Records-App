@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Team Records App
+    </title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <a class="brand" href="/">
+            Team Records
+        </a>
+
+        <nav>
+
+            <a href="/login">
+                Anmelden
+            </a>
+
+            <a href="/register">
+                Registrieren
+            </a>
+
+        </nav>
+
+    </header>
+
+    <main class="page">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+</body>
+
+</html>

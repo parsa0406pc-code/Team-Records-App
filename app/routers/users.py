@@ -46,7 +46,7 @@ def register(
             "register.html",
             {
                 "request": request,
-                "error": "این ایمیل قبلاً ثبت شده است."
+                "error": "Diese E-Mail-Adresse ist bereits registriert."
             },
             status_code=400
         )
@@ -101,7 +101,7 @@ def login(
             "login.html",
             {
                 "request": request,
-                "error": "ایمیل یا رمز عبور اشتباه است."
+                "error": "E-Mail oder Passwort ist falsch."
             },
             status_code=400
         )
