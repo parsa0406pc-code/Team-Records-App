@@ -28,6 +28,8 @@ from app.models import (
 
 from app.auth import login_required
 
+from app.email_utils import send_email
+
 
 router = APIRouter()
 
@@ -69,7 +71,9 @@ async def create_record(
     )
 
     db.add(record)
+
     db.commit()
+
     db.refresh(record)
 
     for uploaded_file in files:
@@ -92,6 +96,7 @@ async def create_record(
         file_path = UPLOAD_DIR / stored_name
 
         with file_path.open("wb") as buffer:
+
             shutil.copyfileobj(
                 uploaded_file.file,
                 buffer
@@ -107,6 +112,32 @@ async def create_record(
         db.add(attachment)
 
     db.commit()
+
+    other_users = db.query(User).filter(
+        User.id != user.id
+    ).all()
+
+    for other_user in other_users:
+
+        try:
+
+            send_email(
+                to_email=other_user.email,
+                subject=f"Neuer Record: {record.title}",
+                body=f"""
+{user.name} hat einen neuen Record erstellt.
+
+Titel:
+{record.title}
+
+Beschreibung:
+{record.description}
+"""
+            )
+
+        except Exception as e:
+
+            print("EMAIL ERROR:", e)
 
     return RedirectResponse(
         url="/",
