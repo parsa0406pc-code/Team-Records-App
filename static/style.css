@@ -105,3 +105,32 @@ input {
 
     margin-bottom: 16px;
 }
+.layout {
+    display: grid;
+
+    grid-template-columns: 1fr 320px;
+
+    gap: 24px;
+}
+
+.section-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+
+    padding: 24px;
+
+    border-radius: 16px;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+}

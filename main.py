@@ -30,5 +30,5 @@ def home(request: Request):
 
     return templates.TemplateResponse(
         request=request,
-        name="base.html"
+        name="index.html"
     )
