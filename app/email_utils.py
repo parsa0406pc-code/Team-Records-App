@@ -1,48 +1,32 @@
 import os
-import smtplib
-
-from email.message import EmailMessage
-
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-
-SMTP_FROM = os.getenv("SMTP_FROM")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+RESEND_FROM = os.getenv("RESEND_FROM", "onboarding@resend.dev")
 
 
-def send_email(
-    to_email: str,
-    subject: str,
-    body: str
-):
-    if not SMTP_HOST:
+def send_email(to_email: str, subject: str, body: str):
+    if not RESEND_API_KEY:
+        print("RESEND_API_KEY is missing")
         return
 
-    message = EmailMessage()
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": RESEND_FROM,
+            "to": [to_email],
+            "subject": subject,
+            "text": body,
+        },
+        timeout=8,
+    )
 
-    message["Subject"] = subject
-    message["From"] = SMTP_FROM
-    message["To"] = to_email
-
-    message.set_content(body)
-
-    with smtplib.SMTP(
-        SMTP_HOST,
-        SMTP_PORT
-    ) as smtp:
-
-        smtp.starttls()
-
-        smtp.login(
-            SMTP_USER,
-            SMTP_PASSWORD
-        )
-
-        smtp.send_message(message)
+    if response.status_code >= 400:
+        print("EMAIL ERROR:", response.status_code, response.text)
