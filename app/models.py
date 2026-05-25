@@ -50,7 +50,15 @@ class User(Base):
         "Record",
         back_populates="creator"
     )
+    password_reset_token: Mapped[str | None] = mapped_column(
+    String(255),
+    nullable=True
+    )
 
+    password_reset_expires_at: Mapped[datetime | None] = mapped_column(
+    DateTime,
+    nullable=True
+    )   
 
 class Record(Base):
     __tablename__ = "records"

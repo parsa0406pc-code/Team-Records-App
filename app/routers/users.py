@@ -1,4 +1,7 @@
 import re
+import secrets
+
+from datetime import datetime, timedelta
 
 from fastapi import (
     APIRouter,
@@ -23,6 +26,8 @@ from app.auth import (
     login_required
 )
 
+from app.email_utils import send_email
+
 
 router = APIRouter()
 
@@ -46,7 +51,6 @@ def is_strong_password(password: str):
 
 @router.get("/register")
 def register_page(request: Request):
-
     return templates.TemplateResponse(
         request=request,
         name="register.html",
@@ -68,7 +72,6 @@ def register(
     password_is_valid, password_error = is_strong_password(password)
 
     if not password_is_valid:
-
         return templates.TemplateResponse(
             request=request,
             name="register.html",
@@ -84,7 +87,6 @@ def register(
     ).first()
 
     if existing_user:
-
         return templates.TemplateResponse(
             request=request,
             name="register.html",
@@ -120,7 +122,6 @@ def register(
 
 @router.get("/login")
 def login_page(request: Request):
-
     return templates.TemplateResponse(
         request=request,
         name="login.html",
@@ -142,11 +143,7 @@ def login(
         User.email == email.lower().strip()
     ).first()
 
-    if not user or not verify_password(
-        password,
-        user.password_hash
-    ):
-
+    if not user or not verify_password(password, user.password_hash):
         return templates.TemplateResponse(
             request=request,
             name="login.html",
@@ -172,7 +169,6 @@ def login(
 
 @router.post("/logout")
 def logout():
-
     response = RedirectResponse(
         url="/",
         status_code=303
@@ -181,6 +177,199 @@ def logout():
     clear_session(response)
 
     return response
+
+
+@router.get("/forgot-password")
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="forgot_password.html",
+        context={
+            "user": None,
+            "error": None,
+            "success": None
+        }
+    )
+
+
+@router.post("/forgot-password")
+def forgot_password(
+    request: Request,
+    email: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.email == email.lower().strip()
+    ).first()
+
+    success_message = "Falls diese E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet."
+
+    if not user:
+        return templates.TemplateResponse(
+            request=request,
+            name="forgot_password.html",
+            context={
+                "user": None,
+                "error": None,
+                "success": success_message
+            }
+        )
+
+    token = secrets.token_urlsafe(32)
+
+    user.password_reset_token = token
+    user.password_reset_expires_at = datetime.utcnow() + timedelta(minutes=30)
+
+    db.commit()
+
+    reset_link = str(request.url_for(
+        "reset_password_page",
+        token=token
+    ))
+
+    send_email(
+        to_email=user.email,
+        subject="Passwort zurücksetzen",
+        body=f"""
+Hallo {user.name},
+
+du kannst dein Passwort über diesen Link zurücksetzen:
+
+{reset_link}
+
+Der Link ist 30 Minuten gültig.
+
+Team Records
+"""
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="forgot_password.html",
+        context={
+            "user": None,
+            "error": None,
+            "success": success_message
+        }
+    )
+
+
+@router.get("/reset-password/{token}")
+def reset_password_page(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.password_reset_token == token
+    ).first()
+
+    if not user or not user.password_reset_expires_at:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={
+                "user": None,
+                "token": token,
+                "error": "Dieser Link ist ungültig.",
+                "success": None
+            },
+            status_code=400
+        )
+
+    if user.password_reset_expires_at < datetime.utcnow():
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={
+                "user": None,
+                "token": token,
+                "error": "Dieser Link ist abgelaufen.",
+                "success": None
+            },
+            status_code=400
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="reset_password.html",
+        context={
+            "user": None,
+            "token": token,
+            "error": None,
+            "success": None
+        }
+    )
+
+
+@router.post("/reset-password/{token}")
+def reset_password(
+    token: str,
+    request: Request,
+    new_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.password_reset_token == token
+    ).first()
+
+    if not user or not user.password_reset_expires_at:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={
+                "user": None,
+                "token": token,
+                "error": "Dieser Link ist ungültig.",
+                "success": None
+            },
+            status_code=400
+        )
+
+    if user.password_reset_expires_at < datetime.utcnow():
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={
+                "user": None,
+                "token": token,
+                "error": "Dieser Link ist abgelaufen.",
+                "success": None
+            },
+            status_code=400
+        )
+
+    password_is_valid, password_error = is_strong_password(new_password)
+
+    if not password_is_valid:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={
+                "user": None,
+                "token": token,
+                "error": password_error,
+                "success": None
+            },
+            status_code=400
+        )
+
+    user.password_hash = hash_password(new_password)
+    user.password_reset_token = None
+    user.password_reset_expires_at = None
+
+    db.commit()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="reset_password.html",
+        context={
+            "user": None,
+            "token": token,
+            "error": None,
+            "success": "Passwort wurde erfolgreich geändert. Du kannst dich jetzt anmelden."
+        }
+    )
 
 
 @router.get("/profile")
@@ -230,10 +419,7 @@ def update_password(
     db: Session = Depends(get_db),
     user: User = Depends(login_required)
 ):
-    if not verify_password(
-        current_password,
-        user.password_hash
-    ):
+    if not verify_password(current_password, user.password_hash):
         return templates.TemplateResponse(
             request=request,
             name="profile.html",
@@ -248,7 +434,6 @@ def update_password(
     password_is_valid, password_error = is_strong_password(new_password)
 
     if not password_is_valid:
-
         return templates.TemplateResponse(
             request=request,
             name="profile.html",
@@ -281,10 +466,7 @@ def delete_account(
     db: Session = Depends(get_db),
     user: User = Depends(login_required)
 ):
-    if not verify_password(
-        current_password,
-        user.password_hash
-    ):
+    if not verify_password(current_password, user.password_hash):
         return RedirectResponse(
             url="/profile",
             status_code=303
