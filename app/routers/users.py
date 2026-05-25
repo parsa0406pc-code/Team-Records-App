@@ -19,7 +19,8 @@ from app.auth import (
     hash_password,
     verify_password,
     create_session,
-    clear_session
+    clear_session,
+    login_required
 )
 
 
@@ -178,5 +179,125 @@ def logout():
     )
 
     clear_session(response)
+
+    return response
+
+
+@router.get("/profile")
+def profile_page(
+    request: Request,
+    user: User = Depends(login_required)
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="profile.html",
+        context={
+            "user": user,
+            "error": None,
+            "success": None
+        }
+    )
+
+
+@router.post("/profile/update-name")
+def update_name(
+    request: Request,
+    name: str = Form(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    user.name = name.strip()
+
+    db.commit()
+    db.refresh(user)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="profile.html",
+        context={
+            "user": user,
+            "error": None,
+            "success": "Name wurde erfolgreich geändert."
+        }
+    )
+
+
+@router.post("/profile/update-password")
+def update_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    if not verify_password(
+        current_password,
+        user.password_hash
+    ):
+        return templates.TemplateResponse(
+            request=request,
+            name="profile.html",
+            context={
+                "user": user,
+                "error": "Das aktuelle Passwort ist falsch.",
+                "success": None
+            },
+            status_code=400
+        )
+
+    password_is_valid, password_error = is_strong_password(new_password)
+
+    if not password_is_valid:
+
+        return templates.TemplateResponse(
+            request=request,
+            name="profile.html",
+            context={
+                "user": user,
+                "error": password_error,
+                "success": None
+            },
+            status_code=400
+        )
+
+    user.password_hash = hash_password(new_password)
+
+    db.commit()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="profile.html",
+        context={
+            "user": user,
+            "error": None,
+            "success": "Passwort wurde erfolgreich geändert."
+        }
+    )
+
+
+@router.post("/profile/delete")
+def delete_account(
+    current_password: str = Form(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(login_required)
+):
+    if not verify_password(
+        current_password,
+        user.password_hash
+    ):
+        return RedirectResponse(
+            url="/profile",
+            status_code=303
+        )
+
+    response = RedirectResponse(
+        url="/register",
+        status_code=303
+    )
+
+    clear_session(response)
+
+    db.delete(user)
+    db.commit()
 
     return response

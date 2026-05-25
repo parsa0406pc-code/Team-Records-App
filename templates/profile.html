@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-box">
+
+    <h1>
+        Profil
+    </h1>
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="success">
+        {{ success }}
+    </div>
+    {% endif %}
+
+    <h2>
+        Name ändern
+    </h2>
+
+    <form method="post" action="/profile/update-name">
+
+        <label>
+            Name
+        </label>
+
+        <input name="name" value="{{ user.name }}" required>
+
+        <button class="btn full">
+            Name speichern
+        </button>
+
+    </form>
+
+</div>
+
+<div class="auth-box">
+
+    <h2>
+        Passwort ändern
+    </h2>
+
+    <form method="post" action="/profile/update-password">
+
+        <label>
+            Aktuelles Passwort
+        </label>
+
+        <input type="password" name="current_password" required>
+
+        <label>
+            Neues Passwort
+        </label>
+
+        <input type="password" name="new_password" required>
+
+        <button class="btn full">
+            Passwort ändern
+        </button>
+
+    </form>
+
+</div>
+
+<div class="auth-box danger-box">
+
+    <h2>
+        Konto löschen
+    </h2>
+
+    <p>
+        Diese Aktion kann nicht rückgängig gemacht werden.
+    </p>
+
+    <form method="post" action="/profile/delete" onsubmit="return confirm('Möchtest du dein Konto wirklich löschen?');">
+
+        <label>
+            Passwort bestätigen
+        </label>
+
+        <input type="password" name="current_password" required>
+
+        <button class="btn danger full">
+            Konto löschen
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
